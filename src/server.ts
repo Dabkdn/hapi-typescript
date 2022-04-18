@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import * as Inert from "@hapi/inert";
 import * as Vision from "@hapi/vision";
 import * as HapiSwagger from "hapi-swagger";
+import mongoose from "mongoose";
 
 dotenv.config();
 const swaggerOptions = {
@@ -52,9 +53,15 @@ const server: hapi.Server = new hapi.Server({
 // });
 
 // Start up service
+export const databaseConnection = `mongodb://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOSTNAME}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}`;
+export const connectDatabase = async () => {
+  console.log(databaseConnection);
+  await mongoose.connect(databaseConnection);
+};
 async function start() {
   try {
-    await server.validator(require('@hapi/joi'))
+    await connectDatabase();
+    await server.validator(require("@hapi/joi"));
     await server.register(plugins);
     await Router.loadRoutes(server);
     await server.start();
